@@ -40,6 +40,8 @@ function cachedIsFile (file, cb) {
 
 const resolveIdAsync = (file, opts) => new Promise((fulfil, reject) => resolveId(file, opts, (err, contents) => err ? reject(err) : fulfil(contents)));
 
+const FALSE = {};
+
 export default function nodeResolve ( options = {} ) {
 	const useModule = options.module !== false;
 	const useMain = options.main !== false;
@@ -86,6 +88,7 @@ export default function nodeResolve ( options = {} ) {
 			// disregard entry module
 			if ( !importer ) return null;
 
+			// https://github.com/defunctzombie/package-browser-field-spec
 			if (options.browser && browserMapCache[importer]) {
 				const resolvedImportee = resolve( dirname( importer ), importee );
 				const browser = browserMapCache[importer];
@@ -161,16 +164,28 @@ export default function nodeResolve ( options = {} ) {
 				importee,
 				Object.assign( resolveOptions, customResolveOptions )
 			)
-				.catch(() => false)
+				.catch(() => FALSE)
 				.then(resolved => {
-					if (options.browser && packageBrowserField) {
-						if (packageBrowserField[ resolved ]) {
-							resolved = packageBrowserField[ resolved ];
+					if (resolved !== FALSE && options.browser && packageBrowserField) {
+						let l;
+						const hasLink = packageBrowserField.hasOwnProperty(resolved);
+						if (hasLink) {
+							l = packageBrowserField[ resolved ];
 						}
-						browserMapCache[resolved] = packageBrowserField;
+						browserMapCache[l || resolved] = packageBrowserField;
+						if (hasLink) {
+							resolved = l;
+						}
+						if (resolved === false) {
+							return ES6_BROWSER_EMPTY;
+						}
 					}
 
-					if ( !disregardResult && resolved !== false ) {
+					if (resolved === FALSE) {
+						return null;
+					}
+
+					if ( !disregardResult ) {
 						if ( !preserveSymlinks && resolved && fs.existsSync( resolved ) ) {
 							resolved = fs.realpathSync( resolved );
 						}
@@ -194,7 +209,7 @@ export default function nodeResolve ( options = {} ) {
 					if ( resolved && options.modulesOnly ) {
 						return readFileAsync( resolved, 'utf-8').then(code => isModule( code ) ? resolved : null);
 					} else {
-						return resolved === false ? null : resolved;
+						return resolved;
 					}
 				});
 		}
