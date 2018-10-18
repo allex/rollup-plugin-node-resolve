@@ -626,4 +626,16 @@ describe( 'rollup-plugin-node-resolve', function () {
 			assert.deepEqual( bundle.imports, [ 'foo/deep' ] );
 		});
 	});
+
+	it( 'pkg.browser with mapping to prevent bundle by specifying a value of false', () => {
+		return rollup.rollup({
+			input: 'samples/browser-object-with-false/main.js',
+			plugins: [ 
+				nodeResolve({ browser: true }),
+				commonjs()
+			]
+		}).then( executeBundle ).then( module => {
+			assert.equal( module.exports, 'ok' );
+		});
+	});
 });
