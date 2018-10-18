@@ -1,4 +1,4 @@
-# rollup-plugin-node-resolve
+# @allex/rollup-plugin-node-resolve
 
 *This plugin used to be called rollup-plugin-npm*
 
@@ -7,14 +7,14 @@ Locate modules using the [Node resolution algorithm](https://nodejs.org/api/modu
 ## Installation
 
 ```bash
-npm install --save-dev rollup-plugin-node-resolve
+npm install --save-dev @allex/rollup-plugin-node-resolve
 ```
 
 ## Usage
 
 ```js
 // rollup.config.js
-import resolve from 'rollup-plugin-node-resolve';
+import resolve from '@allex/rollup-plugin-node-resolve';
 
 export default {
   input: 'main.js',
@@ -75,14 +75,14 @@ export default {
 };
 ```
 
-## Using with rollup-plugin-commonjs
+## Using with @allex/rollup-plugin-commonjs
 
 Since most packages in your node_modules folder are probably legacy CommonJS rather than JavaScript modules, you may need to use [rollup-plugin-commonjs](https://github.com/rollup/rollup-plugin-commonjs):
 
 ```js
 // rollup.config.js
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
+import resolve from '@allex/rollup-plugin-node-resolve';
+import commonjs from '@allex/rollup-plugin-commonjs';
 
 export default {
   input: 'main.js',
