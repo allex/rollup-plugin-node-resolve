@@ -654,4 +654,22 @@ describe( 'rollup-plugin-node-resolve', function () {
 			assert.equal( module.exports, 'ok' );
 		});
 	});
+
+	it( 'resolves module by alias option', () => {
+		return rollup.rollup({
+			input: 'samples/browser-object-with-false/test-alias.js',
+			plugins: [ 
+				nodeResolve({
+					browser: true,
+					alias: {
+						'foo-by-alias': path.resolve('samples/browser-object-with-false/foo.js')
+					}
+				}),
+				commonjs()
+			]
+		}).then( executeBundle ).then( module => {
+			assert.equal( module.exports, 'hi foo!' );
+		});
+	});
+
 });

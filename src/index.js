@@ -1,4 +1,4 @@
-import { dirname, resolve, extname, normalize, sep } from 'path';
+import { dirname, resolve, extname, normalize, sep, join } from 'path';
 import builtins from 'builtin-modules';
 import resolveId from 'resolve';
 import isModule from 'is-module';
@@ -53,6 +53,32 @@ function deprecatedMainField (options, option, mainFields, field = option) {
 
 const resolveIdAsync = (file, opts) => new Promise((fulfil, reject) => resolveId(file, opts, (err, contents) => err ? reject(err) : fulfil(contents)));
 
+// resolve alias helpers
+const isAlias = (file, alias) => {
+	if (alias === file) {
+		return true;
+	}
+	if (!file.startsWith(alias)) {
+		return false;
+	}
+	return file[alias.length] === '/';
+};
+const getAlias = (file, aliases, offset) => {
+	for (let i = offset, l = aliases.length, o; i < l; ++i) {
+		if ((o = aliases[i]) && isAlias(file, o[0])) return [ i, o ];
+	}
+	return null;
+};
+const localImport = /^[.]{1,2}\//;
+const resolveAliases = (target, aliases, offset = 0) => {
+	if (localImport.test(target)) return null;
+	const tuple = getAlias(target, aliases, offset);
+	if (tuple === null) return null;
+	let [ cursor, [ alias, p ] ] = tuple; // eslint-disable-line prefer-const
+	p = join(p, target.substr(alias.length));
+	return resolveAliases(p, aliases, ++cursor) || p;
+};
+
 const FALSE = {};
 
 export default function nodeResolve ( options = {} ) {
@@ -94,6 +120,10 @@ export default function nodeResolve ( options = {} ) {
 		throw new Error( `Please ensure at least one 'mainFields' value is specified` );
 	}
 
+	// { k/v, ... } => [ [k, v], ... ]
+	const kvs = options.alias || {};
+	const aliases = Object.keys(kvs).reduce((p, k) => (p.push([ k, kvs[k] ]), p), []); // eslint-disable-line no-sequences
+
 	let preserveSymlinks;
 
 	return {
@@ -113,6 +143,14 @@ export default function nodeResolve ( options = {} ) {
 
 			// disregard entry module
 			if ( !importer ) return null;
+
+			// check aliases first
+			if (aliases.length) {
+				const alias = resolveAliases(importee, aliases);
+				if (alias) {
+					importee = alias;
+				}
+			}
 
 			// https://github.com/defunctzombie/package-browser-field-spec
 			if (mainFields.includes('browser') && browserMapCache[importer]) {

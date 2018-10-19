@@ -77,6 +77,11 @@ export default {
       // to node-resolve
       customResolveOptions: {
         moduleDirectory: 'js_modules'
+      },
+
+      // Provide alias to overrides specifing modules.
+      alias: {
+        'readable-stream': require.resolve('rollup-plugin-node-builtins/src/es6/stream.js')
       }
     })
   ]
