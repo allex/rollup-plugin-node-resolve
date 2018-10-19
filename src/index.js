@@ -207,7 +207,7 @@ export default function nodeResolve ( options = {} ) {
 					let overriddenMain = false;
 					for ( const i in mainFields ) {
 						const field = mainFields[i];
-						if ( typeof pkg[ field ] === 'string' ) {
+						if ( field !== 'main' && typeof pkg[ field ] === 'string' ) {
 							pkg[ 'main' ] = pkg[ field ];
 							overriddenMain = true;
 							break;
