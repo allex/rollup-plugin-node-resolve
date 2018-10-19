@@ -13,7 +13,7 @@ Locate modules using the [Node resolution algorithm](https://nodejs.org/api/modu
 ## Installation
 
 ```bash
-npm install --save-dev @allex/rollup-plugin-node-resolve
+npm install --save-dev @allex/rollup-plugin-node-resolve@next
 ```
 
 ## Usage
