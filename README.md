@@ -4,6 +4,12 @@
 
 Locate modules using the [Node resolution algorithm](https://nodejs.org/api/modules.html#modules_all_together), for using third party modules in `node_modules`
 
+> Based on offical rollup-plugin-node-resolve, with some improvents and pr merges:
+>
+> * New mainfields option [#182](https://github.com/rollup/rollup-plugin-node-resolve/pull/182)
+> * Add supports alias options
+> * Fix pkg.browser mappings issue by specifying a value of `false` [#183](https://github.com/rollup/rollup-plugin-node-resolve/pull/183)
+
 ## Installation
 
 ```bash
