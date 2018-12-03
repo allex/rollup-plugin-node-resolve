@@ -4,7 +4,7 @@
 
 Locate modules using the [Node resolution algorithm](https://nodejs.org/api/modules.html#modules_all_together), for using third party modules in `node_modules`
 
-> Based on offical rollup-plugin-node-resolve, with some improvents and pr merges:
+> Based on forked from [rollup-plugin-node-resolve](https://github.com/rollup/rollup-plugin-node-resolve), with some improvements and PR merges:
 >
 > * New mainfields option [#182](https://github.com/rollup/rollup-plugin-node-resolve/pull/182)
 > * Add supports alias options
