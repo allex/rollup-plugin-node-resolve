@@ -78,8 +78,6 @@ const resolveAliases = (target, aliases, offset = 0) => {
 	return resolveAliases(p, aliases, ++cursor) || p;
 };
 
-const FALSE = {};
-
 export default function nodeResolve ( options = {} ) {
 	if ('mainFields' in options && ('module' in options || 'main' in options || 'jsnext' in options)) {
 		throw new Error(`node-resolve: do not use deprecated 'module', 'main', 'jsnext' options with 'mainFields'`);
@@ -182,7 +180,7 @@ export default function nodeResolve ( options = {} ) {
 				basedir,
 				packageFilter ( pkg, pkgPath ) {
 					const pkgRoot = dirname( pkgPath );
-					if (mainFields.indexOf('browser') !== -1 && typeof pkg[ 'browser' ] === 'object') {
+					if (mainFields.includes('browser') && typeof pkg[ 'browser' ] === 'object') {
 						packageBrowserField = Object.keys(pkg[ 'browser' ]).reduce((browser, key) => {
 							const resolved = pkg[ 'browser' ][ key ] === false ? false : resolve( pkgRoot, pkg[ 'browser' ][ key ] );
 							browser[ key ] = resolved;
@@ -227,25 +225,16 @@ export default function nodeResolve ( options = {} ) {
 				importee,
 				Object.assign( resolveOptions, customResolveOptions )
 			)
-				.catch(() => FALSE)
 				.then(resolved => {
-					if (resolved !== FALSE && mainFields.includes('browser') && packageBrowserField) {
-						let l;
-						const hasLink = packageBrowserField.hasOwnProperty(resolved);
-						if (hasLink) {
-							l = packageBrowserField[ resolved ];
+					if ( resolved && mainFields.includes('browser') && packageBrowserField ) {
+						if ( packageBrowserField.hasOwnProperty(resolved) ) {
+							if (!packageBrowserField[resolved]) {
+								browserMapCache[resolved] = packageBrowserField;
+								return ES6_BROWSER_EMPTY;
+							}
+							resolved = packageBrowserField[ resolved ];
 						}
-						browserMapCache[l || resolved] = packageBrowserField;
-						if (hasLink) {
-							resolved = l;
-						}
-						if (resolved === false) {
-							return ES6_BROWSER_EMPTY;
-						}
-					}
-
-					if (resolved === FALSE) {
-						return null;
+						browserMapCache[resolved] = packageBrowserField;
 					}
 
 					if ( !disregardResult ) {
@@ -274,7 +263,8 @@ export default function nodeResolve ( options = {} ) {
 					} else {
 						return resolved;
 					}
-				});
+				})
+				.catch(() => null);
 		}
 	};
 }
